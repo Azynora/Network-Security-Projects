@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 ## 🔧 Yêu cầu hệ thống
 
-- OS: Linux (Garuda / Arch / Ubuntu)
+- OS: Linux (Kali / Arch / Ubuntu)
 - Python: 3.10+
 - Docker + Docker Compose
 - Wireshark / Tshark / Nmap
