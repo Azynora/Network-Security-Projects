@@ -24,10 +24,10 @@ source venv/bin/activate
 sudo venv/bin/python src/main.py 192.168.1.0/24
 
 # Kèm port scan (chậm hơn, đầy đủ)
-sudo venv/bin/python src/arp_scan.py 192.168.1.0/24 --ports
+sudo venv/bin/python src/main.py 192.168.1.0/24 --ports
 
 # Tùy chỉnh dải port
-sudo venv/bin/python src/arp_scan.py 192.168.1.0/24 --ports --port-range 1-65535
+sudo venv/bin/python src/main.py 192.168.1.0/24 --ports --port-range 1-65535
 ```
 
 ## Output
