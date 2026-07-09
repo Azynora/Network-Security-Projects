@@ -87,6 +87,7 @@ venv/bin/python level-1-beginner/03-simple-siem/src/main.py detect
 
 ## 📁 Cấu trúc
 
+```
 Network-Security-Projects/
 ├── level-1-beginner/
 │   ├── 01-traffic-analyzer/
@@ -120,7 +121,7 @@ Network-Security-Projects/
 │           └── docker-compose.yml     # ES + Grafana stack
 ├── requirements.txt
 └── resources/
-
+```
 ---
 
 ## ⚠️ Disclaimer
