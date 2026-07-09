@@ -4,19 +4,19 @@ Network Scanner & Asset Discovery
 - ARP scan phát hiện thiết bị online trong LAN
 - Hostname resolution
 - MAC vendor lookup
+- OS fingerprint qua TTL
 - Port scan (tùy chọn, dùng nmap)
 - Xuất báo cáo CSV/JSON
 
 Cần chạy với sudo vì cần raw socket
 """
 
-from scapy.all import ARP, Ether, srp
+from scapy.all import ARP, Ether, IP, ICMP, srp, sr1
 from mac_vendor_lookup import MacLookup
 from rich.console import Console
 from rich.table import Table
 import nmap
 import socket
-import sys
 import csv
 import json
 import argparse
@@ -43,6 +43,36 @@ def get_vendor(mac):
         return "Unknown"
 
 
+def guess_os_by_ttl(ip):
+    """
+    Gửi ICMP ping, đọc TTL trong response để đoán OS
+    TTL gốc thường là: 64 (Linux/macOS/Android), 128 (Windows), 255 (Cisco/Network device)
+    Do đi qua nhiều hop nên TTL nhận được sẽ <= TTL gốc, cần làm tròn lên mốc gần nhất
+    """
+    try:
+        pkt = IP(dst=ip) / ICMP()
+        reply = sr1(pkt, timeout=1, verbose=False)
+
+        if reply is None:
+            return "N/A", None
+
+        ttl = reply.ttl
+
+        if ttl <= 64:
+            os_guess = "Linux / Android / macOS"
+        elif ttl <= 128:
+            os_guess = "Windows"
+        elif ttl <= 255:
+            os_guess = "Cisco / Network Device"
+        else:
+            os_guess = "Unknown"
+
+        return os_guess, ttl
+
+    except Exception:
+        return "N/A", None
+
+
 def arp_scan(target_ip_range):
     console.print(f"[bold cyan][*] Đang quét ARP dải mạng: {target_ip_range}[/bold cyan]")
 
@@ -53,18 +83,21 @@ def arp_scan(target_ip_range):
     answered_list = srp(arp_request_broadcast, timeout=2, verbose=False)[0]
 
     devices = []
-    with console.status("[bold green]Đang tra cứu hostname & vendor...") as status:
+    with console.status("[bold green]Đang tra cứu hostname, vendor & OS fingerprint...") as status:
         for sent, received in answered_list:
             ip = received.psrc
             mac = received.hwsrc
             hostname = get_hostname(ip)
             vendor = get_vendor(mac)
+            os_guess, ttl = guess_os_by_ttl(ip)
 
             devices.append({
                 "ip": ip,
                 "mac": mac,
                 "hostname": hostname,
                 "vendor": vendor,
+                "os_guess": os_guess,
+                "ttl": ttl,
                 "open_ports": []
             })
 
@@ -103,12 +136,14 @@ def print_result(devices, show_ports=False):
     table.add_column("MAC Address", style="magenta")
     table.add_column("Hostname", style="green")
     table.add_column("Vendor", style="yellow")
+    table.add_column("OS Guess (TTL)", style="blue")
 
     if show_ports:
         table.add_column("Open Ports", style="red")
 
     for d in devices:
-        row = [d["ip"], d["mac"], d["hostname"], d["vendor"]]
+        ttl_display = f"{d['os_guess']} (TTL={d['ttl']})" if d["ttl"] else d["os_guess"]
+        row = [d["ip"], d["mac"], d["hostname"], d["vendor"], ttl_display]
         if show_ports:
             ports_str = "\n".join(d["open_ports"]) if d["open_ports"] else "-"
             row.append(ports_str)
@@ -124,10 +159,10 @@ def export_csv(devices, output_dir):
 
     with open(filepath, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["ip", "mac", "hostname", "vendor", "open_ports"])
+        writer.writerow(["ip", "mac", "hostname", "vendor", "os_guess", "ttl", "open_ports"])
         for d in devices:
             ports_str = "; ".join(d["open_ports"])
-            writer.writerow([d["ip"], d["mac"], d["hostname"], d["vendor"], ports_str])
+            writer.writerow([d["ip"], d["mac"], d["hostname"], d["vendor"], d["os_guess"], d["ttl"], ports_str])
 
     console.print(f"[green]✅ Đã xuất CSV: {filepath}[/green]")
 
