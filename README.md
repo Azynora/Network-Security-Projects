@@ -40,13 +40,13 @@ công cụ có sẵn, tự implement từng tính năng để hiểu nguyên lý
 ## 🖥️ Demo
 
 ### 01 - Traffic Analyzer
-![Traffic Analyzer Demo](level-1-beginner/01-traffic-analyzer/docs/screenshots/demo.png)
+![Traffic Analyzer Demo](level-1-beginner/01-traffic-analyzer/docs/screenshots/Screenshot_20260709_211352.png)
 
 ### 02 - Network Scanner
-![Network Scanner Demo](level-1-beginner/02-network-scanner/docs/screenshots/demo.png)
+![Network Scanner Demo](level-1-beginner/02-network-scanner/docs/screenshots/Screenshot_20260709_211120.png)
 
 ### 03 - Simple SIEM Dashboard (Grafana)
-![SIEM Dashboard](level-1-beginner/03-simple-siem/docs/screenshots/grafana-dashboard.png)
+![SIEM Dashboard](level-1-beginner/03-simple-siem/docs/screenshots/Screenshot_20260709_211508.png)
 
 ---
 
@@ -86,6 +86,7 @@ venv/bin/python level-1-beginner/03-simple-siem/src/main.py detect
 ---
 
 ## 📁 Cấu trúc
+
 Network-Security-Projects/
 ├── level-1-beginner/
 │   ├── 01-traffic-analyzer/
