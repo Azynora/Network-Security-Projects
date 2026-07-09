@@ -1,4 +1,4 @@
-# 🔍 02 - Network Scanner & Asset Discovery
+# 🔍 02 - Network Scannermain & Asset Discovery
 
 ## Mô tả
 Quét mạng LAN, phát hiện thiết bị online, nhận diện OS và scan port mở.
@@ -21,7 +21,7 @@ Quét mạng LAN, phát hiện thiết bị online, nhận diện OS và scan po
 source venv/bin/activate
 
 # Chỉ ARP scan + OS fingerprint (nhanh)
-sudo venv/bin/python src/arp_scan.py 192.168.1.0/24
+sudo venv/bin/python src/.py 192.168.1.0/24
 
 # Kèm port scan (chậm hơn, đầy đủ)
 sudo venv/bin/python src/arp_scan.py 192.168.1.0/24 --ports

@@ -20,7 +20,7 @@ Phân tích file `.pcap`, thống kê traffic và phát hiện các dấu hiệu
 source venv/bin/activate
 
 # Phân tích cơ bản
-venv/bin/python src/analyzer.py samples/my_traffic.pcap
+venv/bin/python src/main.py samples/my_traffic.pcap
 
 # Tùy chỉnh ngưỡng phát hiện
 venv/bin/python src/analyzer.py samples/attack_test.pcap \
