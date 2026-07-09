@@ -23,7 +23,7 @@ Xây dựng các công cụ thực tế từ đầu để luyện kỹ năng:
 | # | Level | Dự án | Công nghệ | Status |
 |---|-------|--------|-----------|--------|
 | 01 | ⭐ Beginner | [Traffic Analyzer](level-1-beginner/01-traffic-analyzer/) | Python, Scapy, Tshark | 🚧 In Progress |
-| 02 | ⭐ Beginner | [Network Scanner](level-1-beginner/02-network-scanner/) | Python, Nmap, ARP | 📅 Planned |
+| 02 | ⭐ Beginner | [Network Scanner](level-1-beginner/02-network-scanner/) | Python, Nmap, ARP | ✅ Done |
 | 03 | ⭐ Beginner | [Simple SIEM](level-1-beginner/03-simple-siem/) | ELK, Grafana, Docker | 📅 Planned |
 | - | ⭐⭐ Intermediate | *(Coming soon)* | - | 🔒 Locked |
 | - | ⭐⭐⭐ Advanced | *(Coming soon)* | - | 🔒 Locked |
