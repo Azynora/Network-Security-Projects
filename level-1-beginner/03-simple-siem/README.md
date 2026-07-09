@@ -10,7 +10,8 @@ Thu thập log hệ thống Linux qua journalctl, lưu trữ vào SQLite, và ph
 - [x] Truy vấn log theo priority, unit
 - [x] Phát hiện sudo brute-force (nhiều lần nhập sai password)
 - [x] Phát hiện SSH login thất bại
-- [ ] Dashboard Grafana (sắp tới)
+- [x] Đẩy log lên Elasticsearch (bulk indexing, dedup bằng SQLite id)
+- [x] Dashboard Grafana: Log Volume, Priority Distribution, Top Units, Recent Logs
 
 ## Kỹ năng
 `Python` `Linux systemd/journald` `SQLite` `Log parsing`
@@ -46,3 +47,29 @@ src/
 - Dedup logic dựa trên (timestamp, pid, message) để tránh lưu trùng log khi chạy collect nhiều lần.
 - Cần user thuộc group `systemd-journal` để đọc log không cần sudo:
   `sudo usermod -aG systemd-journal $USER` rồi logout/login lại.
+
+## Stack
+`Python` `SQLite` `Elasticsearch 8.13` `Grafana 10.4` `Docker Compose`
+
+## Cách chạy
+
+```bash
+# 1. Khởi động Docker stack
+cd docker && docker compose up -d
+
+# 2. Thu thập log và lưu SQLite
+venv/bin/python src/main.py collect --minutes 60 --save
+
+# 3. Đẩy lên Elasticsearch
+venv/bin/python src/main.py index
+
+# 4. Phát hiện bất thường
+venv/bin/python src/main.py detect --sudo-threshold 3
+
+# 5. Xem dashboard
+# Mở http://localhost:3000 (admin/admin)
+```
+
+## Screenshots
+![Grafana Dashboard](docs/screenshots/grafana-dashboard.png)
+![Detection Output](docs/screenshots/detection-output.png)
