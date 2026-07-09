@@ -71,5 +71,4 @@ venv/bin/python src/main.py detect --sudo-threshold 3
 ```
 
 ## Screenshots
-![Grafana Dashboard](docs/screenshots/grafana-dashboard.png)
-![Detection Output](docs/screenshots/detection-output.png)
+![Grafana Dashboard](docs/screenshots/Screenshot_20260709_211508.png)
