@@ -23,7 +23,7 @@ source venv/bin/activate
 venv/bin/python src/main.py samples/my_traffic.pcap
 
 # Tùy chỉnh ngưỡng phát hiện
-venv/bin/python src/analyzer.py samples/attack_test.pcap \
+venv/bin/python src/main.py samples/attack_test.pcap \
     --syn-threshold 20 \
     --port-threshold 15 \
     --ping-threshold 10
