@@ -1,16 +1,48 @@
 # 📊 03 - Simple SIEM
 
 ## Mô tả
-Thu thập log từ Linux/Windows, parse, lưu trữ và hiển thị dashboard.
+Thu thập log hệ thống Linux qua journalctl, lưu trữ vào SQLite, và phát hiện hành vi bất thường.
 
-## Tính năng dự kiến
-- [ ] Thu thập syslog từ Linux
-- [ ] Parse và normalize log
-- [ ] Lưu vào SQLite / Elasticsearch
-- [ ] Dashboard bằng Grafana
+## Tính năng
+- [x] Thu thập log qua `journalctl` (JSON format, không cần regex)
+- [x] Chuẩn hóa log thành format thống nhất
+- [x] Lưu vào SQLite với dedup logic (tránh lưu trùng)
+- [x] Truy vấn log theo priority, unit
+- [x] Phát hiện sudo brute-force (nhiều lần nhập sai password)
+- [x] Phát hiện SSH login thất bại
+- [ ] Dashboard Grafana (sắp tới)
 
-## Stack
-`Python` `Docker` `Elasticsearch` `Grafana`
+## Kỹ năng
+`Python` `Linux systemd/journald` `SQLite` `Log parsing`
 
 ## Cách chạy
-*(Sẽ cập nhật khi code xong)*
+
+```bash
+source venv/bin/activate
+
+# Thu thập log 60 phút gần đây và lưu vào SQLite
+venv/bin/python src/main.py collect --minutes 60 --save
+
+# Chỉ xem log lỗi/cảnh báo, không lưu
+venv/bin/python src/main.py collect --minutes 30 --priority err
+
+# Phát hiện hành vi bất thường từ log đã lưu
+venv/bin/python src/main.py detect --sudo-threshold 3
+```
+
+## Cấu trúc
+src/
+├── main.py              # entry point, CLI sub-commands
+└── siem/
+├── journal_reader.py # đọc log qua journalctl
+├── storage.py         # SQLite: init, save, query
+├── detection.py       # brute-force, failed SSH detection
+└── display.py          # in bảng kết quả
+
+## Ghi chú kỹ thuật
+- Garuda Linux (và các distro dùng systemd) không có `/var/log/syslog` truyền thống.
+  Log được truy cập qua `journalctl -o json`, tự động có cấu trúc JSON sẵn, không cần viết regex.
+- Priority theo chuẩn syslog: 0=EMERG, 1=ALERT, 2=CRIT, 3=ERR, 4=WARNING, 5=NOTICE, 6=INFO, 7=DEBUG.
+- Dedup logic dựa trên (timestamp, pid, message) để tránh lưu trùng log khi chạy collect nhiều lần.
+- Cần user thuộc group `systemd-journal` để đọc log không cần sudo:
+  `sudo usermod -aG systemd-journal $USER` rồi logout/login lại.
