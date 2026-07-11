@@ -10,6 +10,7 @@ console = Console()
 
 ES_HOST = "http://localhost:9200"
 INDEX_NAME = "siem-logs"
+ALERT_INDEX_NAME = "siem-alerts"
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "db", "siem.db")
 
@@ -45,6 +46,58 @@ def create_index_if_not_exists(es):
     es.indices.create(index=INDEX_NAME, body=mapping)
     console.print(f"[green]✅ Đã tạo index '{INDEX_NAME}'[/green]")
 
+def create_alert_index_if_not_exists(es):
+    """Tạo index alerts với mapping phù hợp"""
+    if es.indices.exists(index=ALERT_INDEX_NAME):
+        return
+
+    mapping = {
+        "mappings": {
+            "properties": {
+                "detected_at": {"type": "date"},
+                "alert_type": {"type": "keyword"},
+                "user": {"type": "keyword"},
+                "count": {"type": "integer"},
+                "severity": {"type": "keyword"},
+                "description": {"type": "text"},
+            }
+        }
+    }
+
+    es.indices.create(index=ALERT_INDEX_NAME, body=mapping)
+    console.print(f"[green]✅ Đã tạo index '{ALERT_INDEX_NAME}'[/green]")
+
+
+def index_alerts_to_es(suspects):
+    """
+    Đẩy kết quả detection lên ES index siem-alerts
+    suspects: dict {user: [log_entries]}
+    """
+    if not suspects:
+        console.print("[yellow]Không có alert nào để index[/yellow]")
+        return 0
+
+    es = get_es_client()
+    create_alert_index_if_not_exists(es)
+
+    actions = []
+    for user, entries in suspects.items():
+        doc = {
+            "detected_at": datetime.utcnow().isoformat(),
+            "alert_type": "sudo_brute_force",
+            "user": user,
+            "count": len(entries),
+            "severity": "HIGH" if len(entries) >= 10 else "MEDIUM",
+            "description": f"User '{user}' có {len(entries)} lần nhập sai sudo password"
+        }
+        actions.append({
+            "_index": ALERT_INDEX_NAME,
+            "_source": doc
+        })
+
+    success, errors = helpers.bulk(es, actions, raise_on_error=False)
+    console.print(f"[green]✅ Đã index {success} alert lên Elasticsearch[/green]")
+    return success
 
 def convert_journal_timestamp(raw_ts):
     """

@@ -42,6 +42,22 @@ underlying principles.
 
 ## ⚙️ Installation
 
+### System Dependencies (Arch/Garuda Linux)
+
+```bash
+sudo pacman -S nmap tcpdump tshark wireshark-qt docker docker-compose python python-pip
+```
+
+### Start and Enable Docker
+
+```bash
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+# Log out and back in
+```
+
+### Setup Python Virtual Environment
+
 ```bash
 git clone git@github.com:Azynora/Network-Security-Projects.git
 cd Network-Security-Projects
@@ -49,29 +65,61 @@ cd Network-Security-Projects
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
 
-# System tools (Arch/Garuda)
-sudo pacman -S nmap tshark tcpdump wireshark-qt
+### Grant Journal Access (for Project 03 - SIEM)
+
+```bash
+sudo usermod -aG systemd-journal $USER
+# Log out and back in
 ```
 
 ## 🚀 Quick Start
 
-```bash
-# 02 - Network Scanner
-sudo venv/bin/python level-1-beginner/02-network-scanner/src/main.py 192.168.1.0/24 --ports
+### Project 01 - Traffic Analyzer
 
-# 01 - Traffic Analyzer
+```bash
+# Analyze a .pcap file
 venv/bin/python level-1-beginner/01-traffic-analyzer/src/main.py path/to/capture.pcap
 
-# 03 - Simple SIEM (requires Docker)
-cd level-1-beginner/03-simple-siem/docker && docker compose up -d
-cd ../.. && venv/bin/python level-1-beginner/03-simple-siem/src/main.py collect --minutes 60 --save
-venv/bin/python level-1-beginner/03-simple-siem/src/main.py index
-venv/bin/python level-1-beginner/03-simple-siem/src/main.py detect
-# Grafana dashboard → http://localhost:3000
+# With custom detection thresholds
+venv/bin/python level-1-beginner/01-traffic-analyzer/src/main.py samples/attack_test.pcap \
+    --syn-threshold 20 \
+    --port-threshold 15 \
+    --ping-threshold 10
 ```
 
----
+### Project 02 - Network Scanner
+
+```bash
+# ARP scan + OS fingerprint (fast)
+sudo venv/bin/python level-1-beginner/02-network-scanner/src/main.py 192.168.1.0/24
+
+# With port scan (slower, more complete)
+sudo venv/bin/python level-1-beginner/02-network-scanner/src/main.py 192.168.1.0/24 --ports
+```
+
+### Project 03 - Simple SIEM
+
+```bash
+# 1. Start Docker stack (Elasticsearch + Grafana)
+cd level-1-beginner/03-simple-siem/docker && docker compose up -d
+cd ../../..
+
+# 2. Collect logs and save to SQLite
+venv/bin/python level-1-beginner/03-simple-siem/src/main.py collect --minutes 60 --save
+
+# 3. Index logs to Elasticsearch
+venv/bin/python level-1-beginner/03-simple-siem/src/main.py index
+
+# 4. Detect anomalies
+venv/bin/python level-1-beginner/03-simple-siem/src/main.py detect --sudo-threshold 3
+
+# 5. OR run the full pipeline in one command
+venv/bin/python level-1-beginner/03-simple-siem/src/main.py pipeline --minutes 60 --sudo-threshold 3
+
+# 6. View Grafana dashboard → http://localhost:3000 (admin/admin)
+```
 
 ## 📁 Project Structure
 
@@ -79,23 +127,28 @@ venv/bin/python level-1-beginner/03-simple-siem/src/main.py detect
 Network-Security-Projects/
 ├── level-1-beginner/
 │   ├── 01-traffic-analyzer/
-│   │   └── src/
-│   │       ├── main.py
-│   │       └── analyzer/
-│   │           ├── loader.py      # read .pcap
-│   │           ├── stats.py       # top talkers/ports/protocols
-│   │           ├── detection.py   # SYN flood, port scan, ping sweep
-│   │           └── display.py     # rich table output
+│   │   ├── src/
+│   │   │   ├── main.py
+│   │   │   └── analyzer/
+│   │   │       ├── loader.py      # read .pcap
+│   │   │       ├── stats.py       # top talkers/ports/protocols
+│   │   │       ├── detection.py   # SYN flood, port scan, ping sweep
+│   │   │       └── display.py     # rich table output
+│   │   ├── samples/               # sample .pcap files
+│   │   ├── docs/                  # screenshots and documentation
+│   │   └── README.md              # bilingual (EN + VI)
 │   ├── 02-network-scanner/
-│   │   └── src/
-│   │       ├── main.py
-│   │       └── scanner/
-│   │           ├── arp.py         # ARP scan
-│   │           ├── fingerprint.py # OS detect via TTL
-│   │           ├── ports.py       # nmap port scan
-│   │           ├── lookup.py      # hostname + MAC vendor
-│   │           ├── display.py     # rich table output
-│   │           └── exporter.py    # CSV/JSON export
+│   │   ├── src/
+│   │   │   ├── main.py
+│   │   │   └── scanner/
+│   │   │       ├── arp.py         # ARP scan
+│   │   │       ├── fingerprint.py # OS detect via TTL
+│   │   │       ├── ports.py       # nmap port scan
+│   │   │       ├── lookup.py      # hostname + MAC vendor
+│   │   │       ├── display.py     # rich table output
+│   │   │       └── exporter.py    # CSV/JSON export
+│   │   ├── docs/                  # screenshots and documentation
+│   │   └── README.md              # bilingual (EN + VI)
 │   └── 03-simple-siem/
 │       ├── src/
 │       │   ├── main.py
@@ -105,12 +158,30 @@ Network-Security-Projects/
 │       │       ├── detection.py       # brute-force detection
 │       │       ├── display.py         # rich output
 │       │       └── es_indexer.py      # Elasticsearch indexer
-│       └── docker/
-│           └── docker-compose.yml     # ES + Grafana stack
+│       ├── docker/
+│       │   └── docker-compose.yml     # ES + Grafana stack
+│       └── README.md                  # bilingual (EN + VI)
 ├── requirements.txt
 └── resources/
-
 ```
+
+---
+
+## 🛠️ Tools Used
+
+| Tool | Purpose | Project |
+|------|---------|---------|
+| **Scapy** | Packet crafting and .pcap parsing | 01, 02 |
+| **tcpdump** | Capture network traffic | 01 |
+| **nmap** | Port scanning | 02 |
+| **Nping** | Generate test attack traffic | 01 |
+| **Wireshark/tshark** | Network protocol analysis | 01 |
+| **journalctl** | Read systemd logs | 03 |
+| **SQLite** | Log storage | 03 |
+| **Elasticsearch** | Log indexing and search | 03 |
+| **Grafana** | Log visualization dashboards | 03 |
+| **Docker Compose** | SIEM stack deployment | 03 |
+
 ---
 
 ## ⚠️ Disclaimer
@@ -118,3 +189,30 @@ Network-Security-Projects/
 > Tools in this repository are **for educational purposes only**, in a lab
 > environment or on networks you own and have permission to test.
 > Do not use on unauthorized systems.
+
+---
+
+## 📚 Documentation
+
+Each project has its own detailed README with:
+- Complete installation instructions
+- All command-line arguments documented
+- Step-by-step usage guides
+- Troubleshooting tips
+- Technical notes and references
+
+**Individual project READMEs:**
+- [01 - Traffic Analyzer](level-1-beginner/01-traffic-analyzer/README.md)
+- [02 - Network Scanner](level-1-beginner/02-network-scanner/README.md)
+- [03 - Simple SIEM](level-1-beginner/03-simple-siem/README.md)
+
+---
+
+## 🔗 References
+
+- [Scapy Documentation](https://scapy.net/)
+- [Nmap Reference Guide](https://nmap.org/book/man.html)
+- [systemd Journal Documentation](https://www.freedesktop.org/software/systemd/man/journalctl.html)
+- [Elasticsearch 8.x Reference](https://www.elastic.co/guide/en/elasticsearch/reference/8.13/)
+- [Grafana Documentation](https://grafana.com/docs/)
+- [TCP/IP Illustrated, Volume 1](https://www.amazon.com/dp/0201533487)
