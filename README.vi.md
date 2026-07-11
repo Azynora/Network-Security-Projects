@@ -73,53 +73,6 @@ sudo usermod -aG systemd-journal $USER
 # Log out và login lại
 ```
 
-## 🚀 Chạy nhanh
-
-### Dự án 01 - Traffic Analyzer
-
-```bash
-# Phân tích file .pcap
-venv/bin/python level-1-beginner/01-traffic-analyzer/src/main.py path/to/capture.pcap
-
-# Với ngưỡng phát hiện tùy chỉnh
-venv/bin/python level-1-beginner/01-traffic-analyzer/src/main.py samples/attack_test.pcap \
-    --syn-threshold 20 \
-    --port-threshold 15 \
-    --ping-threshold 10
-```
-
-### Dự án 02 - Network Scanner
-
-```bash
-# ARP scan + OS fingerprint (nhanh)
-sudo venv/bin/python level-1-beginner/02-network-scanner/src/main.py 192.168.1.0/24
-
-# Với port scan (chậm hơn, đầy đủ hơn)
-sudo venv/bin/python level-1-beginner/02-network-scanner/src/main.py 192.168.1.0/24 --ports
-```
-
-### Dự án 03 - Simple SIEM
-
-```bash
-# 1. Khởi động Docker stack (Elasticsearch + Grafana)
-cd level-1-beginner/03-simple-siem/docker && docker compose up -d
-cd ../../..
-
-# 2. Thu thập log và lưu vào SQLite
-venv/bin/python level-1-beginner/03-simple-siem/src/main.py collect --minutes 60 --save
-
-# 3. Đẩy log lên Elasticsearch
-venv/bin/python level-1-beginner/03-simple-siem/src/main.py index
-
-# 4. Phát hiện bất thường
-venv/bin/python level-1-beginner/03-simple-siem/src/main.py detect --sudo-threshold 3
-
-# 5. HOẶC chạy full pipeline trong một lệnh
-venv/bin/python level-1-beginner/03-simple-siem/src/main.py pipeline --minutes 60 --sudo-threshold 3
-
-# 6. Xem Grafana dashboard → http://localhost:3000 (admin/admin)
-```
-
 ## 📁 Cấu trúc dự án
 
 ```
