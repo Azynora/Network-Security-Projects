@@ -58,3 +58,7 @@ level-1-beginner/03-simple-siem/docker/volumes/
 *.swo
 .DS_Store
 Thumbs.db
+
+# SIEM database
+level-1-beginner/03-simple-siem/db/*.db
+!level-1-beginner/03-simple-siem/db/.gitkeep
